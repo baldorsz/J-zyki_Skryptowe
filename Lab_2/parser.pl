@@ -2,8 +2,8 @@
 
 start:
 print "Podaj nazwę pliku: ";
-$file = "plan_zajec.ics";#<STDIN>;
-#chop($file);
+$file = <STDIN>;
+chop($file);
 
 unless(-e $file) {
     print "Podany plik nie istnieje\n";
@@ -54,6 +54,7 @@ while(defined($line=<$plik>))
     {
         if(defined($catch[1]))
         {
+            chop ($line);
             push @toCSV, $line;
         }
         if(@catch)
@@ -104,19 +105,18 @@ for ($i=0; $i < scalar(@toCSV); $i++)
     @En = $endDates[$i] =~ /(\d{4})(\d{2})(\d{2}):T(\d{2}):(\d{2})/gm;
     $e3 = '"' . $En[3] . ':' . $En[4] . '",'; #time
 
-    @info = $toCSV[$i] =~ /SUMMARY:(.+) - Nazwa sem\.: (.+), Nr sem.+Grupa: (.+), Sala: (.+)/gm;
+    @info = $toCSV[$i] =~ /SUMMARY:(.+) - Nazwa sem\.: (.+), Nr sem.+Grupa: (.+), Sala: (.+)\s/gm;
     $e4 = '"' . $info[0] . '",';
     $e5 = '"' . $info[1] . '",';
     $e6 = '"' . $info[2] . '",';
-    $e7 = '"' . $info[3] . '",';
-    $e8 = "\n";
-    print {$fh} $e1 . $e2 . $e3 . $e4 . $e5 . $e6 . $e7 . $e8;
+    $e7 = '"' . $info[3] . '"' . "\n";
+    print {$fh} $e1 . $e2 . $e3 . $e4 . $e5 . $e6 . $e7;
 }
 
 close $fh;
 
 print "Zapisano do pliku!\n";
 
-close $file;
+close $plik;
 
 
