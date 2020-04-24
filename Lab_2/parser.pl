@@ -2,8 +2,8 @@
 
 start:
 print "Podaj nazwę pliku: ";
-$file = <STDIN>;
-chop($file);
+$file = "plan_zajec.ics";#<STDIN>;
+#chop($file);
 
 unless(-e $file) {
     print "Podany plik nie istnieje\n";
@@ -15,8 +15,7 @@ open $plik, $file;
 @lastStart = (0,0);
 @lastEnd = (0,0);
 
-$sumaMin = 0;
-$counter = 0;
+$sumaGodz = 0;
 $lastMin;
 
 @startDates;
@@ -37,7 +36,6 @@ while(defined($line=<$plik>))
         {
             @lastStart = ($2, $3);
             push @startDates, "$1:T$2:$3";
-            $counter+=1;
         }
     }
     elsif($line =~ /DTEND.+:(\d+)T(\d{2})(\d{2})/gm)
@@ -47,43 +45,37 @@ while(defined($line=<$plik>))
             @lastEnd = ($2, $3);
             $end = $2*60+$3;
             $start = $lastStart[0]*60+$lastStart[1];
-            $sumaMin += $end - $start;
             $lastMin = $end - $start;
+            $sumaGodz += int(($lastMin/45));
             push @endDates, "$1:T$2:$3";
         }
     }
-    elsif($line =~ /SUMMARY:(.+) - (?:.+)Grupa: (.+),/gm)
+    elsif(@catch = $line =~ /SUMMARY:(.+) - (?:.+)Grupa: (.+),/gm)
     {
-        if(defined($1))
+        if(defined($catch[1]))
         {
             push @toCSV, $line;
         }
-        if(defined($1))
+        if(@catch)
         {
-            @TypeAndDegree = $2 =~ /(S|N)(\d)/gm;
-            $Form = $2 =~ /_(W|L)/gm;
-            $subjects{$1}+=int(($lastMin/45));
+            @TypeAndDegree = $catch[1] =~ /(S|N)(\d)/gm; 
+            @Form = $catch[1] =~ /_(W|L)(?:_?)/gm;
+            $subjects{$catch[0]}+=int(($lastMin/45));
             if(!defined($TypeAndDegree[0]))
             {
                 $StudyType{"other"}+=int(($lastMin/45));
-                $StudyType{$Form}+=int(($lastMin/45));
+                $StudyType{$Form[0]}+=int(($lastMin/45));
             }
             else {
-                $StudyType{$TypeAndDegree[0]} += int(($lastMin/45));
+                $StudyType{$TypeAndDegree[0]} +=  int(($lastMin/45));
                 $StudyType{$TypeAndDegree[1]} += int(($lastMin/45));
-                $StudyType{$Form} += int(($lastMin/45));
+                $StudyType{$Form[0]} += int(($lastMin/45));
             }
         }
     }
 }
 
-for $type (keys %StudyType)
-{
-    print "\n$type: $StudyType{$type}";
-}
-print "\n";
-
-print "Łączna liczba godzin lekcyjnych: " . int(($sumaMin/45));
+print "Łączna liczba godzin lekcyjnych: " . int(($sumaGodz));
 print "\nLiczba godzin lekcyjnych dla niestacjonarnych: " . $StudyType{"N"};
 print "\nLiczba godzin lekcyjnych dla stacjonarnych: " . $StudyType{"S"};
 print "\nLiczba godzin lekcyjnych dla stopnia 1: " . $StudyType{"1"};
@@ -99,14 +91,32 @@ for $subject (keys %subjects)
 }
 print "\n";
 
-# open $fh, '>', 'plan.csv';
+open $fh, '>', 'plan.csv';
 
-# print {$fh} '"Data","Od","Do","Przedmiot","Grupa","Sala"';
-# print {$fh} "\n";
+print {$fh} '"Data","Od","Do","Przedmiot","Semestr","Grupa","Sala"';
+print {$fh} "\n";
 
-# for ($i=0; $i < scalar(@toCSV); $i++)
-# {
+for ($i=0; $i < scalar(@toCSV); $i++)
+{
+    @St = $startDates[$i] =~ /(\d{4})(\d{2})(\d{2}):T(\d{2}):(\d{2})/gm;
+    $e1 = '"' . $St[0] . '.' . $St[1] . '.' . $St[2] . '",'; #data
+    $e2 = '"' . $St[3] . ':' . $St[4] . '",'; #time
+    @En = $endDates[$i] =~ /(\d{4})(\d{2})(\d{2}):T(\d{2}):(\d{2})/gm;
+    $e3 = '"' . $En[3] . ':' . $En[4] . '",'; #time
 
-# }
+    @info = $toCSV[$i] =~ /SUMMARY:(.+) - Nazwa sem\.: (.+), Nr sem.+Grupa: (.+), Sala: (.+)/gm;
+    $e4 = '"' . $info[0] . '",';
+    $e5 = '"' . $info[1] . '",';
+    $e6 = '"' . $info[2] . '",';
+    $e7 = '"' . $info[3] . '",';
+    $e8 = "\n";
+    print {$fh} $e1 . $e2 . $e3 . $e4 . $e5 . $e6 . $e7 . $e8;
+}
+
+close $fh;
+
+print "Zapisano do pliku!\n";
+
+close $file;
 
 
