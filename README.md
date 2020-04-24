@@ -1,1 +1,0 @@
-# J-zyki_Skryptowe
