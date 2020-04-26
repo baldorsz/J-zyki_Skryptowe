@@ -1,5 +1,10 @@
 #!/usr/bin/perl
 
+# Bartosz Narożniak
+# 41458
+# 31B
+# Zadanie na ocenę 5
+
 start:
 print "Podaj nazwę pliku: ";
 $file = <STDIN>;

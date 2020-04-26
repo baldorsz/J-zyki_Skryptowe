@@ -1,5 +1,10 @@
 #!/usr/bin/perl
 
+# Bartosz Narożniak
+# 41458
+# 31B
+# Zadanie na ocenę 5
+
 $length = @ARGV;
 if($length > 4) {
     die "Too much arguments!";
