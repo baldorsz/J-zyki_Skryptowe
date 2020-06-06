@@ -19,4 +19,61 @@ duplicate = dict()
 
 def Tree(path):
     for root, dirs, files in os.walk(path):
-        
+        for file in files:
+            fullpath = root + "/" + file
+            statistics = os.stat(fullpath)
+            if (allFiles.get(statistics.st_size) == None):
+                allFiles[statistics.st_size] = list()
+            allFiles[statistics.st_size].append(fullpath)
+
+def SameSize():
+    for v in allFiles.keys():
+        Compare(allFiles[v])
+
+def Compare(files):
+    for f in files:
+        for v in files:
+            if (f == v):
+                continue
+            if (BytesComp(f, v)):
+                if(duplicate.get(v) == None):
+                    if(duplicate.get(f) == None):
+                        duplicate[f] = list()
+                    duplicate[f].append(v)
+                else:
+                    if(not f in duplicate[v]):
+                        duplicate[v].append(f)
+
+def BytesComp(f1, f2):
+    with open(f1, "r") as file1:
+        with open(f2, "r") as file2:
+            while True:
+                b1 = file1.read(1)
+                b2 = file2.read(1)
+                if(b1 != b2):
+                    return False
+                if(b1 == b2):
+                    break
+
+    return True
+
+argTable = sys.argv[1:len(sys.argv)]
+
+for arg in argTable:
+    f = os.stat(arg)
+    if(f != None and stat.S_ISDIR(f.st_mode)):
+        Tree(arg)
+    else:
+        sys.stderr.write("Nieprawidłowy argument")
+        exit(1)
+
+SameSize()
+print("Duplikaty:")
+
+for fileD in duplicate:
+    print("Duplikaty dla pliku {}:".format(fileD))
+    i=1
+    for duplic in duplicate[fileD]:
+        print("\t {}. {}".format(str(i), duplic))
+        i+=1
+
