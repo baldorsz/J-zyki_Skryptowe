@@ -50,7 +50,7 @@ def BytesComp(f1, f2):
             while True:
                 if(file1.read(1) != file2.read(1)):
                     return False
-                if(file1.read(1) != file2.read(1)):
+                if(file1.read(1) == file2.read(1)):
                     break
 
     return True
