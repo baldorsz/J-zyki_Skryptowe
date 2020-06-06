@@ -11,7 +11,7 @@ import string
 
 if(len(sys.argv) == 1):
     sys.stderr.write("Podaj nazwe pliku jako argument.")
-    exit()
+    exit(1)
 
 letters = dict()
 

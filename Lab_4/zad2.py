@@ -55,3 +55,4 @@ try:
 
 except FileNotFoundError:
     sys.stderr.write("Nie znaleziono pliku")
+    exit(1)
