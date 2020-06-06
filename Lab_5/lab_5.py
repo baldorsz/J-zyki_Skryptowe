@@ -23,12 +23,12 @@ def Tree(path):
             fullpath = root + "/" + file
             statistics = os.stat(fullpath)
             if (allFiles.get(statistics.st_size) == None):
-                allFiles[statistics.st_size] = list()
+                allFiles[statistics.st_size] = []
             allFiles[statistics.st_size].append(fullpath)
 
 def SameSize():
-    for v in allFiles.keys():
-        Compare(allFiles[v])
+    for key in allFiles.keys():
+        Compare(allFiles[key])
 
 def Compare(files):
     for f in files:
@@ -38,7 +38,7 @@ def Compare(files):
             if (BytesComp(f, v)):
                 if(duplicate.get(v) == None):
                     if(duplicate.get(f) == None):
-                        duplicate[f] = list()
+                        duplicate[f] = []
                     duplicate[f].append(v)
                 else:
                     if(not f in duplicate[v]):
@@ -48,11 +48,9 @@ def BytesComp(f1, f2):
     with open(f1, "r") as file1:
         with open(f2, "r") as file2:
             while True:
-                b1 = file1.read(1)
-                b2 = file2.read(1)
-                if(b1 != b2):
+                if(file1.read(1) != file2.read(1)):
                     return False
-                if(b1 == b2):
+                if(file1.read(1) != file2.read(1)):
                     break
 
     return True
